@@ -35,7 +35,7 @@ local setpoint_limit_device_field = {
 }
 
 local COMPONENT_TO_ENDPOINT_MAP = "__component_to_endpoint_map"
-local SUPPORTED_TEMPERATURE_LEVEL = "__supported_temperature_levels"
+local SUPPORTED_TEMPERATURE_LEVELS_MAP = "__supported_temperature_levels_map"
 local SUPPORTED_REFRIGERATOR_TCC_MODES_MAP = "__supported_refrigerator_tcc_modes_map"
 
 local function endpoint_to_component(device, ep)
@@ -144,7 +144,8 @@ local function selected_temperature_level_attr_handler(driver, device, ib, respo
     string.format("selected_temperature_level_attr_handler: %s", ib.data.value))
 
   local temperatureLevel = ib.data.value
-  local supportedTemperatureLevels = device:get_field(SUPPORTED_TEMPERATURE_LEVEL)
+  local supportedTemperatureLevelsMap = device:get_field(SUPPORTED_TEMPERATURE_LEVELS_MAP) or {}
+  local supportedTemperatureLevels = supportedTemperatureLevelsMap[ib.endpoint_id] or {}
   for i, tempLevel in ipairs(supportedTemperatureLevels) do
     if i - 1 == temperatureLevel then
       device:emit_event_for_endpoint(ib.endpoint_id, capabilities.temperatureLevel.temperatureLevel(tempLevel))
@@ -159,13 +160,15 @@ local function supported_temperature_levels_attr_handler(driver, device, ib, res
     device.log.warn_with({ hub_logs = true }, string.format("Device does not support TEMPERATURE_LEVEL feature"))
     return
   end
+  local supportedTemperatureLevelsMap = device:get_field(SUPPORTED_TEMPERATURE_LEVELS_MAP) or {}
   local supportedTemperatureLevels = {}
   for _, tempLevel in ipairs(ib.data.elements) do
     log.info_with({ hub_logs = true },
       string.format("supported_temperature_levels_attr_handler: %s", tempLevel.value))
     table.insert(supportedTemperatureLevels, tempLevel.value)
   end
-  device:set_field(SUPPORTED_TEMPERATURE_LEVEL, supportedTemperatureLevels, { persist = true })
+  supportedTemperatureLevelsMap[ib.endpoint_id] = supportedTemperatureLevels
+  device:set_field(SUPPORTED_TEMPERATURE_LEVELS_MAP, supportedTemperatureLevelsMap, { persist = true })
   local event = capabilities.temperatureLevel.supportedTemperatureLevels(supportedTemperatureLevels, {visibility = {displayed = false}})
   device:emit_event_for_endpoint(ib.endpoint_id, event)
 end
@@ -189,7 +192,7 @@ local function refrigerator_tcc_mode_attr_handler(driver, device, ib, response)
   device.log.info_with({ hub_logs = true },
     string.format("refrigerator_tcc_mode_attr_handler currentMode: %s", ib.data.value))
 
-  local supportedRefrigeratorTccModesMap = device:get_field(SUPPORTED_REFRIGERATOR_TCC_MODES_MAP)
+  local supportedRefrigeratorTccModesMap = device:get_field(SUPPORTED_REFRIGERATOR_TCC_MODES_MAP) or {}
   local supportedRefrigeratorTccModes = supportedRefrigeratorTccModesMap[ib.endpoint_id] or {}
   local currentMode = ib.data.value
   for i, mode in ipairs(supportedRefrigeratorTccModes) do
@@ -228,7 +231,7 @@ local function handle_refrigerator_tcc_mode(driver, device, cmd)
     string.format("handle_refrigerator_tcc_mode mode: %s", cmd.args.mode))
 
   local ep = component_to_endpoint(device, cmd.component)
-  local supportedRefrigeratorTccModesMap = device:get_field(SUPPORTED_REFRIGERATOR_TCC_MODES_MAP)
+  local supportedRefrigeratorTccModesMap = device:get_field(SUPPORTED_REFRIGERATOR_TCC_MODES_MAP) or {}
   local supportedRefrigeratorTccModes = supportedRefrigeratorTccModesMap[ep] or {}
   for i, mode in ipairs(supportedRefrigeratorTccModes) do
     if cmd.args.mode == mode then
@@ -276,7 +279,8 @@ local function handle_temperature_level(driver, device, cmd)
   device.log.info_with({ hub_logs = true },
     string.format("handle_temperature_level: %s(%d)", cmd.args.temperatureLevel, ep))
 
-  local supportedTemperatureLevels = device:get_field(SUPPORTED_TEMPERATURE_LEVEL)
+  local supportedTemperatureLevelsMap = device:get_field(SUPPORTED_TEMPERATURE_LEVELS_MAP) or {}
+  local supportedTemperatureLevels = supportedTemperatureLevelsMap[ep] or {}
   for i, tempLevel in ipairs(supportedTemperatureLevels) do
     if cmd.args.temperatureLevel == tempLevel then
       device:send(clusters.TemperatureControl.commands.SetTemperature(device, ep, nil, i - 1))
