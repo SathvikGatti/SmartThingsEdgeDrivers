@@ -271,7 +271,7 @@ end
 local function do_configure(driver, device)
   local power_meas_eps = embedded_cluster_utils.get_endpoints(device, clusters.ElectricalPowerMeasurement.ID) or {}
   local energy_meas_eps = embedded_cluster_utils.get_endpoints(device, clusters.ElectricalEnergyMeasurement.ID) or {}
-  local device_energy_mgmt_eps = embedded_cluster_utils.get_endpoints(device, clusters.DeviceEnergyManagementMode) or {}
+  local device_energy_mgmt_eps = embedded_cluster_utils.get_endpoints(device, clusters.DeviceEnergyManagementMode.ID) or {}
   local profile_name = "evse"
 
   -- As per spec, at least one of the electrical energy measurement or electrical power measurement clusters are to be supported.
