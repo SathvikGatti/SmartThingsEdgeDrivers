@@ -84,14 +84,14 @@ jobs:
       - name: Install Python requirements
         run: pip install -r tools/requirements.txt
       - name: List matter drivers
-        id: list_dirs
+        id: list-dirs
         run: |
-          dirs=$(find drivers/ -type d -name 'matter-*' -print)
+          dirs=$(find drivers/ -maxdepth 1 -type d -name 'matter-*' -print)
           echo "Directories matching 'matter-*': $dirs"
-          echo "matter_dirs=$dirs" >> $GITHUB_ENV
+          echo ${{ steps.list-dirs.outputs.driver_dirs }}
       - name: Run the tests
         id: run-tests
-        run: python tools/run_driver_tests_p.py ${{env.matter_dirs}}
+        run: python tools/run_driver_tests_p.py  ${{ steps.list-dirs.outputs.driver_dirs }}
         env:
           LUA_PATH: ${{ steps.lua_path.outputs.lua_path }}
       - name: Upload test artifact
