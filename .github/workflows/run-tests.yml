@@ -88,7 +88,7 @@ jobs:
         run: |
           dirs=$(find drivers/ -maxdepth 2 -type d -name 'matter-*' -print)
           echo "Directories matching 'matter-*': $dirs"
-          echo "::set-output name=dirs::$dirs"
+          echo "dirs=$dirs" >> $GITHUB_OUTPUT
       - name: Run the tests
         id: run-tests
         run: |
