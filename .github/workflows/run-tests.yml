@@ -86,7 +86,7 @@ jobs:
       - name: List matter drivers
         id: list-dirs
         run: |
-          dirs=$(find drivers/ -maxdepth 1 -type d -name 'matter-*' -print)
+          dirs=$(find drivers/ -maxdepth 2 -type d -name 'matter-*' -print)
           echo "Directories matching 'matter-*': $dirs"
           echo ${{ steps.list-dirs.outputs.driver_dirs }}
       - name: Run the tests
