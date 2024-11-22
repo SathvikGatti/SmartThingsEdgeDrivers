@@ -101,7 +101,7 @@ jobs:
         with:
           name: coverage
           path: |
-            tools/coverage_output/*_coverage.xml
+            tools/coverage_output/*.xml
 
   event-file:
     runs-on: ubuntu-latest
