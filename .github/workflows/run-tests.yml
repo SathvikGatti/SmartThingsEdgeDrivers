@@ -91,7 +91,10 @@ jobs:
           echo ${{ steps.list-dirs.outputs.driver_dirs }}
       - name: Run the tests
         id: run-tests
-        run: python tools/run_driver_tests_p.py  ${{ steps.list-dirs.outputs.driver_dirs }}
+        run: |
+          python tools/run_driver_tests_p.py  ${{ steps.list-dirs.outputs.driver_dirs }}
+          out=$(ls tools/coverage_output/ -print)
+          echo "Coverage output: $out"
         env:
           LUA_PATH: ${{ steps.lua_path.outputs.lua_path }}
       - name: Upload test artifact
