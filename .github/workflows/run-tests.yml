@@ -1,5 +1,6 @@
 name: Run driver tests
 on:
+  workflow_dispatch:
   pull_request:
     types: [opened, synchronize, labeled, unlabeled]
     paths:
@@ -83,17 +84,12 @@ jobs:
       - uses: actions/checkout@v3
       - name: Install Python requirements
         run: pip install -r tools/requirements.txt
-      - name: List matter drivers
-        id: list-dirs
-        run: |
-          dirs=$(find drivers/ -maxdepth 2 -type d -name 'matter-*' -print)
-          echo "Directories matching 'matter-*': $dirs"
       - name: Run the tests
         id: run-tests
         run: |
-          python tools/run_driver_tests_p.py  ${dirs}
-          out=$(ls output/coverage_output/ -print)
-          echo "Coverage output: $out"
+          matter_driver_dirs=$(find drivers/ -maxdepth 2 -type d -name 'matter-*' -print)
+          echo "Matter Drivers: $matter_driver_dirs"
+          python tools/run_driver_tests_p.py $matter_driver_dirs
         env:
           LUA_PATH: ${{ steps.lua_path.outputs.lua_path }}
       - name: Upload test artifact
