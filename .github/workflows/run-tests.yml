@@ -28,6 +28,7 @@ jobs:
         if: steps.cached-libs.outputs.cache-hit != 'true'
         uses: dsaltares/fetch-gh-release-asset@master
         with:
+          repo: 'SmartThingsCommunity/SmartThingsEdgeDrivers'
           file: 'lua_libs.*'
           regex: true
           target: '/home/runner/work/lua_libs/'
@@ -37,8 +38,7 @@ jobs:
         run: tar -xf *.tar.gz --wildcards -C . --strip-components=1 '*.lua'
       - name: Set output
         id: cache_key
-        run: echo "
-        =${{ steps.lib-version.outputs.url }}-v1" >> $GITHUB_OUTPUT
+        run: echo "CACHE_KEY=${{ steps.lib-version.outputs.url }}-v1" >> $GITHUB_OUTPUT
 
   run-driver-tests:
     runs-on: ubuntu-latest
@@ -81,20 +81,17 @@ jobs:
           eval "$(luarocks path --bin)"
           echo "lua_path=$LUA_PATH_APPEND;$LUA_PATH" >> $GITHUB_OUTPUT
       - uses: actions/checkout@v3
-      - name: get changed drivers
-        id: changed-drivers
-        uses: tj-actions/changed-files@v41
-        with:
-          dir_names: true
-          dir_names_max_depth: 3
-          files: "drivers/**"
-          safe_output: false
-      - run: echo ${{ steps.changed-drivers.outputs.all_modified_files }}
       - name: Install Python requirements
         run: pip install -r tools/requirements.txt
+      - name: List matter drivers
+        id: list-dirs
+        run: |
+          dirs=$(find drivers/ -maxdepth 1 -type d -name 'matter-*' -print)
+          echo "Directories matching 'matter-*': $dirs"
+          echo ${{ steps.list-dirs.outputs.driver_dirs }}
       - name: Run the tests
         id: run-tests
-        run: python tools/run_driver_tests_p.py ${{ steps.changed-drivers.outputs.all_modified_files }}
+        run: python tools/run_driver_tests_p.py  ${{ steps.list-dirs.outputs.driver_dirs }}
         env:
           LUA_PATH: ${{ steps.lua_path.outputs.lua_path }}
       - name: Upload test artifact
@@ -110,7 +107,7 @@ jobs:
         with:
           name: coverage
           path: |
-            tools/coverage_output/*_coverage.xml
+            tools/coverage_output/*.xml
 
   event-file:
     runs-on: ubuntu-latest
