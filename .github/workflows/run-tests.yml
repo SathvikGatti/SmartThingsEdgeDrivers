@@ -88,13 +88,12 @@ jobs:
         run: |
           dirs=$(find drivers/ -maxdepth 2 -type d -name 'matter-*' -print)
           echo "Directories matching 'matter-*': $dirs"
-          echo ${{ steps.list-dirs.outputs.driver_dirs }}
+          echo "::set-output name=dirs::$dirs"
       - name: Run the tests
         id: run-tests
         run: |
-          python tools/run_driver_tests_p.py  ${{ steps.list-dirs.outputs.driver_dirs }}
-          out=$(ls tools/coverage_output/ -print)
-          echo "Coverage output: $out"
+          matter_driver_dirs="${{ steps.list-dirs.outputs.dirs }}"
+          python tools/run_driver_tests_p.py $matter_driver_dirs
         env:
           LUA_PATH: ${{ steps.lua_path.outputs.lua_path }}
       - name: Upload test artifact
