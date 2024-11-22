@@ -86,6 +86,9 @@ jobs:
       - name: Run the tests
         id: run-tests
         run: python tools/run_driver_tests_p.py .\drivers\SmartThings\matter-appliance\ .\drivers\SmartThings\matter-button\ .\drivers\SmartThings\matter-thermostat\ .\drivers\SmartThings\matter-evse\ .\drivers\SmartThings\matter-lock\ .\drivers\SmartThings\matter-media\ .\drivers\SmartThings\matter-pump\ .\drivers\SmartThings\matter-sensor\ .\drivers\SmartThings\matter-rvc\ .\drivers\SmartThings\matter-switch\ .\drivers\SmartThings\matter-window-covering\ 
+      - name: List the coverage output 
+        id: list-output
+        run: ls tools/coverage_output/
         env:
           LUA_PATH: ${{ steps.lua_path.outputs.lua_path }}
       - name: Upload test artifact
