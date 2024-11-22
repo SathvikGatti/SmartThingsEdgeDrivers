@@ -84,16 +84,10 @@ jobs:
       - uses: actions/checkout@v3
       - name: Install Python requirements
         run: pip install -r tools/requirements.txt
-      - name: List matter drivers
-        id: list-dirs
-        run: |
-          dirs=$(find drivers/ -maxdepth 2 -type d -name 'matter-*' -print)
-          echo "Directories matching 'matter-*': $dirs"
-          echo "dirs=$dirs" >> $GITHUB_OUTPUT
       - name: Run the tests
         id: run-tests
         run: |
-          python tools/run_driver_tests_p.py  drivers/Smartthings/matter-appliance drivers/Smartthings/matter-button drivers/Smartthings/matter-evse drivers/Smartthings/matter-lock drivers/Smartthings/matter-media drivers/Smartthings/matter-pump drivers/Smartthings/matter-rvc drivers/Smartthings/matter-sensor drivers/Smartthings/matter-switch drivers/Smartthings/matter-thermostat drivers/Smartthings/matter-window-covering
+          python tools/run_driver_tests_p.py drivers/Smartthings/matter-appliance drivers/Smartthings/matter-button drivers/Smartthings/matter-evse drivers/Smartthings/matter-lock drivers/Smartthings/matter-media drivers/Smartthings/matter-pump drivers/Smartthings/matter-rvc drivers/Smartthings/matter-sensor drivers/Smartthings/matter-switch drivers/Smartthings/matter-thermostat drivers/Smartthings/matter-window-covering
         env:
           LUA_PATH: ${{ steps.lua_path.outputs.lua_path }}
       - name: Upload test artifact
