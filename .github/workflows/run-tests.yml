@@ -1,5 +1,6 @@
 name: Run driver tests
 on:
+  workflow_dispatch:
   pull_request:
     types: [opened, synchronize, labeled, unlabeled]
     paths:
@@ -92,8 +93,7 @@ jobs:
       - name: Run the tests
         id: run-tests
         run: |
-          matter_driver_dirs="${{ steps.list-dirs.outputs.dirs }}"
-          python tools/run_driver_tests_p.py $matter_driver_dirs
+          python tools/run_driver_tests_p.py  drivers/Smartthings/matter-appliance drivers/Smartthings/matter-button drivers/Smartthings/matter-evse drivers/Smartthings/matter-lock drivers/Smartthings/matter-media drivers/Smartthings/matter-pump drivers/Smartthings/matter-rvc drivers/Smartthings/matter-sensor drivers/Smartthings/matter-switch drivers/Smartthings/matter-thermostat drivers/Smartthings/matter-window-covering
         env:
           LUA_PATH: ${{ steps.lua_path.outputs.lua_path }}
       - name: Upload test artifact
